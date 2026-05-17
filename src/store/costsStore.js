@@ -15,7 +15,7 @@ const defaultState = {
   rawMaterial: 8000,
   cardFeePercent: 2,
   revenue: 20000,
-  workDays: 26,
+  workDays: 22,
   hoursPerDay: 10,
 };
 
