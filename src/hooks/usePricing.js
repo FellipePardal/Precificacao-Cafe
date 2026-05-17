@@ -1,6 +1,6 @@
-import { useCostsStore, totalFixedCosts } from '../store/costsStore';
+import { useCostsStore } from '../store/costsStore';
+import { useEmployees } from './useEmployees';
 import {
-  costPerMinute,
   laborCost,
   totalItemCost,
   sellingPrice,
@@ -10,9 +10,7 @@ import {
 
 export function usePricing({ ingredients = [], prepTime = 0, packaging = 0, margin = 40 }) {
   const store = useCostsStore();
-  const totalFixed = totalFixedCosts(store);
-  const totalMonthlyCost = totalFixed + store.rawMaterial;
-  const costPerMin = costPerMinute(totalMonthlyCost, store.workDays, store.hoursPerDay);
+  const { laborCostPerMin: costPerMin } = useEmployees();
 
   const ingredientCost = calcIngredientCost(ingredients);
   const laborCostValue = laborCost(costPerMin, parseFloat(prepTime) || 0);

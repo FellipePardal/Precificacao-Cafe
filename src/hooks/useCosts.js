@@ -1,16 +1,13 @@
 import { useCostsStore, totalFixedCosts } from '../store/costsStore';
-import {
-  costPerMinute,
-  breakEven,
-  cmvPercent,
-} from '../utils/pricing';
+import { useEmployees } from './useEmployees';
+import { breakEven, cmvPercent } from '../utils/pricing';
 
 export function useCosts() {
   const store = useCostsStore();
+  const { payroll, laborCostPerMin } = useEmployees();
 
   const totalFixed = totalFixedCosts(store);
   const totalMonthlyCost = totalFixed + store.rawMaterial;
-  const costPerMin = costPerMinute(totalMonthlyCost, store.workDays, store.hoursPerDay);
   const cmv = cmvPercent(store.rawMaterial, store.revenue);
   const breakEvenValue = breakEven(totalFixed, cmv, store.cardFeePercent);
 
@@ -18,7 +15,8 @@ export function useCosts() {
     ...store,
     totalFixed,
     totalMonthlyCost,
-    costPerMin,
+    payroll,
+    costPerMin: laborCostPerMin,
     cmv,
     breakEvenValue,
   };
