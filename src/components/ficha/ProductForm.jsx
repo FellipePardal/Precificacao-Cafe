@@ -1,151 +1,97 @@
 import React from 'react';
 import IngredientRow from './IngredientRow';
 
-const categories = [
-  'Bebidas Quentes',
-  'Bebidas Frias',
-  'Salgados',
-  'Doces & Sobremesas',
-  'Lanches',
-  'Pratos',
-];
+const categories = ['Bebidas Quentes', 'Bebidas Frias', 'Salgados', 'Doces & Sobremesas', 'Lanches', 'Pratos'];
 
 function newIngredient() {
-  return { id: Date.now() + Math.random(), name: '', qty: '', unit: 'g', price: '' };
+  return { id: crypto.randomUUID(), ingredientId: '', name: '', qty: '', unit: 'g', price: '' };
 }
 
+const labelCls  = 'text-[11px] font-semibold text-muted uppercase tracking-widest mb-1.5 block';
+const inputCls  = 'border border-border rounded-lg px-3 py-2.5 text-sm w-full bg-white focus:outline-none focus:ring-2 focus:ring-accent/30';
+const selectCls = inputCls;
+
 export default function ProductForm({ value, onChange }) {
-  function handleField(field, val) {
-    onChange({ ...value, [field]: val });
-  }
+  function set(field, val) { onChange({ ...value, [field]: val }); }
 
-  function addIngredient() {
-    handleField('ingredients', [...(value.ingredients || []), newIngredient()]);
-  }
-
-  function updateIngredient(id, updated) {
-    handleField(
-      'ingredients',
-      value.ingredients.map((ing) => (ing.id === id ? updated : ing))
-    );
-  }
-
-  function removeIngredient(id) {
-    handleField(
-      'ingredients',
-      value.ingredients.filter((ing) => ing.id !== id)
-    );
-  }
+  function addIngredient()         { set('ingredients', [...(value.ingredients || []), newIngredient()]); }
+  function update(id, updated)     { set('ingredients', value.ingredients.map((i) => (i.id === id ? updated : i))); }
+  function remove(id)              { set('ingredients', value.ingredients.filter((i) => i.id !== id)); }
 
   return (
-    <div className="bg-surface rounded-xl border border-border shadow-sm p-5 space-y-4">
+    <div className="bg-white rounded-xl border border-border p-5 space-y-5 animate-fade-up">
       <h2 className="font-serif text-base text-dark">Dados do Produto</h2>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="text-xs font-medium text-muted mb-1 block">Nome do Produto</label>
-          <input
-            type="text"
-            value={value.name}
-            onChange={(e) => handleField('name', e.target.value)}
-            placeholder="Ex: Cappuccino"
-            className="border border-border rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-accent/30"
-          />
+          <label className={labelCls}>Nome do Produto</label>
+          <input type="text" value={value.name} onChange={(e) => set('name', e.target.value)}
+            placeholder="Ex: Prato Filé de Frango" className={inputCls} />
         </div>
         <div>
-          <label className="text-xs font-medium text-muted mb-1 block">Categoria</label>
-          <select
-            value={value.category}
-            onChange={(e) => handleField('category', e.target.value)}
-            className="border border-border rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-accent/30 bg-surface"
-          >
+          <label className={labelCls}>Categoria</label>
+          <select value={value.category} onChange={(e) => set('category', e.target.value)} className={selectCls}>
             <option value="">Selecione...</option>
-            {categories.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
+            {categories.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
         <div>
-          <label className="text-xs font-medium text-muted mb-1 block">Porções</label>
-          <input
-            type="number"
-            min="1"
-            value={value.portions}
-            onChange={(e) => handleField('portions', e.target.value)}
-            className="border border-border rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-accent/30"
-          />
+          <label className={labelCls}>Porções</label>
+          <input type="number" min="1" value={value.portions} onChange={(e) => set('portions', e.target.value)} className={inputCls} />
         </div>
         <div>
-          <label className="text-xs font-medium text-muted mb-1 block">Tempo Preparo (min)</label>
-          <input
-            type="number"
-            min="0"
-            value={value.prepTime}
-            onChange={(e) => handleField('prepTime', e.target.value)}
-            className="border border-border rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-accent/30"
-          />
+          <label className={labelCls}>Preparo (min)</label>
+          <input type="number" min="0" value={value.prepTime} onChange={(e) => set('prepTime', e.target.value)} className={inputCls} />
         </div>
         <div>
-          <label className="text-xs font-medium text-muted mb-1 block">Embalagem (R$)</label>
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            value={value.packaging}
-            onChange={(e) => handleField('packaging', e.target.value)}
-            className="border border-border rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-accent/30"
-          />
+          <label className={labelCls}>Embalagem (R$)</label>
+          <input type="number" min="0" step="0.01" value={value.packaging} onChange={(e) => set('packaging', e.target.value)} className={inputCls} />
         </div>
       </div>
 
       <div>
-        <label className="text-xs font-medium text-muted mb-1 block">Margem Desejada (%)</label>
-        <input
-          type="number"
-          min="0"
-          max="99"
-          step="1"
-          value={value.margin}
-          onChange={(e) => handleField('margin', e.target.value)}
-          className="border border-border rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-accent/30"
-        />
+        <label className={labelCls}>Margem Desejada (%)</label>
+        <input type="number" min="0" max="99" value={value.margin} onChange={(e) => set('margin', e.target.value)} className={inputCls} />
       </div>
 
+      {/* Ingredients */}
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-xs font-medium text-muted">Ingredientes</label>
-          <button
-            onClick={addIngredient}
-            className="text-xs font-medium text-accent hover:underline"
-          >
+        <div className="flex items-center justify-between mb-3">
+          <label className={labelCls + ' mb-0'}>Ingredientes</label>
+          <button type="button" onClick={addIngredient}
+            className="text-xs font-semibold text-accent hover:underline">
             + Adicionar ingrediente
           </button>
         </div>
+
         {value.ingredients && value.ingredients.length > 0 ? (
           <div className="space-y-2">
-            <div className="grid grid-cols-[1fr_80px_64px_96px_36px] gap-2 mb-1">
-              <span className="text-xs text-muted">Nome</span>
-              <span className="text-xs text-muted">Qtd</span>
-              <span className="text-xs text-muted">Unid</span>
-              <span className="text-xs text-muted">Preço/un</span>
+            <div className="grid grid-cols-[1fr_72px_68px_72px_auto] gap-2 mb-1 px-0.5">
+              <span className="text-[11px] text-muted font-semibold uppercase tracking-widest">Ingrediente</span>
+              <span className="text-[11px] text-muted font-semibold uppercase tracking-widest">Qtd</span>
+              <span className="text-[11px] text-muted font-semibold uppercase tracking-widest">Unid</span>
+              <span className="text-[11px] text-muted font-semibold uppercase tracking-widest">Custo</span>
               <span />
             </div>
             {value.ingredients.map((ing) => (
               <IngredientRow
                 key={ing.id}
                 ingredient={ing}
-                onChange={(updated) => updateIngredient(ing.id, updated)}
-                onRemove={() => removeIngredient(ing.id)}
+                onChange={(updated) => update(ing.id, updated)}
+                onRemove={() => remove(ing.id)}
               />
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted italic text-center py-4 bg-surface2 rounded-lg">
-            Nenhum ingrediente adicionado
-          </p>
+          <div className="text-center py-6 bg-surface rounded-xl border border-dashed border-border">
+            <p className="text-sm text-muted">Nenhum ingrediente adicionado ainda.</p>
+            <p className="text-xs text-muted/70 mt-1">
+              Cadastre os ingredientes em <strong>Ingredientes</strong> e selecione aqui.
+            </p>
+          </div>
         )}
       </div>
     </div>

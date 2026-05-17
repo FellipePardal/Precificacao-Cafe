@@ -1,8 +1,8 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 
-const BROWN = '#3D2010';
-const BROWN_HOVER = '#4F2A14';
+const BROWN        = '#3D2010';
+const BROWN_HOVER  = '#4F2A14';
 const GREEN_ACTIVE = '#286044';
 
 const navItems = [
@@ -13,6 +13,10 @@ const navItems = [
   {
     to: '/custos', label: 'Custos Fixos',
     icon: <svg width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>,
+  },
+  {
+    to: '/ingredientes', label: 'Ingredientes',
+    icon: <svg width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>,
   },
   {
     to: '/ficha', label: 'Ficha Técnica',
@@ -30,21 +34,15 @@ const navItems = [
 
 function NavItem({ item }) {
   const [hovered, setHovered] = React.useState(false);
-
   return (
     <NavLink
       to={item.to}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={({ isActive }) => ({
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        padding: '9px 12px',
-        borderRadius: '8px',
-        fontSize: '13px',
-        fontWeight: 500,
-        textDecoration: 'none',
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '9px 12px', borderRadius: 8,
+        fontSize: 13, fontWeight: 500, textDecoration: 'none',
         transition: 'background 0.15s',
         backgroundColor: isActive ? GREEN_ACTIVE : hovered ? BROWN_HOVER : 'transparent',
         color: isActive ? '#fff' : hovered ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)',
@@ -58,22 +56,16 @@ function NavItem({ item }) {
 
 export default function Sidebar() {
   return (
-    <aside
-      style={{ backgroundColor: BROWN, width: 210, minHeight: '100vh', flexShrink: 0, display: 'flex', flexDirection: 'column' }}
-    >
-      {/* Brand */}
+    <aside style={{ backgroundColor: BROWN, width: 210, minHeight: '100vh', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
       <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
         <p style={{ fontFamily: '"DM Serif Display", serif', color: '#fff', fontSize: '1.1rem', lineHeight: 1, margin: 0 }}>Coffee & Cake</p>
         <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 4, letterSpacing: '0.05em' }}>Precificação</p>
       </div>
-
-      {/* Nav */}
-      <nav style={{ flex: 1, padding: '12px' }}>
+      <nav style={{ flex: 1, padding: 12 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {navItems.map((item) => <NavItem key={item.to} item={item} />)}
         </div>
       </nav>
-
       <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
         <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', margin: 0 }}>v1.0</p>
       </div>
