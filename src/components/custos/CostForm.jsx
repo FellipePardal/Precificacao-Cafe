@@ -1,5 +1,7 @@
 import React from 'react';
 import { useCosts } from '../../hooks/useCosts';
+import { useEmployees } from '../../hooks/useEmployees';
+import { formatBRL } from '../../utils/formatters';
 
 const inputCls = "flex-1 px-3 py-2.5 text-sm text-dark bg-white focus:outline-none tabular-nums";
 const wrapCls  = "flex items-center border border-border rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-accent/30 bg-white";
@@ -34,13 +36,25 @@ export default function CostForm() {
     fixedCosts, rawMaterial, cardFeePercent, revenue, workDays, hoursPerDay,
     updateFixedCost, updateRawMaterial, updateCardFee, updateRevenue, updateWorkDays, updateHoursPerDay,
   } = useCosts();
+  const { payroll, employees } = useEmployees();
 
   return (
     <div className="space-y-4">
       <Section title="Custos Fixos Mensais" delay="delay-1">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Aluguel"             value={fixedCosts.aluguel}  onChange={(v) => updateFixedCost('aluguel', v)} />
-          <Field label="Folha + Encargos"    value={fixedCosts.folha}    onChange={(v) => updateFixedCost('folha', v)} />
+          <div>
+            <label className={labelCls}>Folha + Encargos</label>
+            <div className={wrapCls} style={{ opacity: 0.75 }}>
+              <span className={prefCls}>R$</span>
+              <span className={inputCls + ' flex items-center text-dark font-semibold select-none'}>
+                {formatBRL(payroll)}
+              </span>
+              <span className={sufCls} style={{ fontSize: 10, whiteSpace: 'nowrap' }}>
+                {employees.length} func. · Equipe
+              </span>
+            </div>
+          </div>
           <Field label="Energia"             value={fixedCosts.energia}  onChange={(v) => updateFixedCost('energia', v)} />
           <Field label="Água & Gás"          value={fixedCosts.aguaGas}  onChange={(v) => updateFixedCost('aguaGas', v)} />
           <Field label="Internet & Telefone" value={fixedCosts.internet} onChange={(v) => updateFixedCost('internet', v)} />
