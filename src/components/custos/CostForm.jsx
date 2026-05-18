@@ -40,8 +40,15 @@ export default function CostForm() {
   const { setSelectedMonth } = useCostsStore();
   const { payroll, employees } = useEmployees();
 
+  const [slideClass, setSlideClass] = React.useState('');
+
   const currentYM = ymNow();
   const atCurrent = selectedMonth === currentYM;
+
+  function navigate(ym, direction) {
+    setSlideClass(direction === 'prev' ? 'animate-slide-left' : 'animate-slide-right');
+    setSelectedMonth(ym);
+  }
 
   return (
     <div className="space-y-4">
@@ -49,7 +56,7 @@ export default function CostForm() {
       {/* Month navigator */}
       <div className="bg-white rounded-xl border border-border px-5 py-4 flex items-center justify-between animate-fade-up">
         <button
-          onClick={() => setSelectedMonth(prevYM(selectedMonth))}
+          onClick={() => navigate(prevYM(selectedMonth), 'prev')}
           className="p-2 rounded-lg hover:bg-surface transition-colors text-muted hover:text-dark"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -65,7 +72,7 @@ export default function CostForm() {
         </div>
 
         <button
-          onClick={() => setSelectedMonth(nextYM(selectedMonth))}
+          onClick={() => navigate(nextYM(selectedMonth), 'next')}
           disabled={atCurrent}
           className="p-2 rounded-lg hover:bg-surface transition-colors text-muted hover:text-dark disabled:opacity-25 disabled:cursor-not-allowed"
         >
@@ -74,6 +81,9 @@ export default function CostForm() {
           </svg>
         </button>
       </div>
+
+      {/* Animated content — key forces re-mount on month change */}
+      <div key={selectedMonth} className={slideClass}>
 
       {/* Fixed costs */}
       <Section title="Custos Fixos Mensais" delay="delay-1">
@@ -126,6 +136,8 @@ export default function CostForm() {
           </div>
         </div>
       </Section>
+
+      </div>{/* end animated content */}
     </div>
   );
 }
