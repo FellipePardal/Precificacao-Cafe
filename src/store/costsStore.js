@@ -23,29 +23,55 @@ export function ymLabel(ym) {
   return `${MONTHS[m - 1]} ${y}`;
 }
 
-const FIXED_KEYS = ['aluguel', 'energia', 'aguaGas', 'internet', 'outros'];
-const DEFAULT_FIXED = { aluguel: 4500, energia: 600, aguaGas: 350, internet: 150, outros: 300 };
-const DEFAULT_MONTH = { fixedCosts: { ...DEFAULT_FIXED }, rawMaterial: 8000, revenue: 20000 };
+const FIXED_KEYS    = ['aluguel', 'energia', 'aguaGas', 'internet', 'outros'];
+const VARIABLE_KEYS = ['mercado', 'feira', 'hortifruti', 'salgados', 'doces', 'outros'];
+
+const DEFAULT_FIXED    = { aluguel: 4500, energia: 600, aguaGas: 350, internet: 150, outros: 300 };
+const DEFAULT_VARIABLE = { mercado: 4000, feira: 1000, hortifruti: 800, salgados: 1000, doces: 800, outros: 400 };
+const DEFAULT_MONTH    = { fixedCosts: { ...DEFAULT_FIXED }, variableCosts: { ...DEFAULT_VARIABLE }, revenue: 20000 };
 
 function deepCopy(obj) { return JSON.parse(JSON.stringify(obj)); }
 
+function migrateMonthEntry(entry) {
+  if (entry.variableCosts) return entry;
+  // old format had rawMaterial — move it to mercado
+  return {
+    fixedCosts:    entry.fixedCosts || { ...DEFAULT_FIXED },
+    variableCosts: { ...DEFAULT_VARIABLE, mercado: entry.rawMaterial ?? 4000 },
+    revenue:       entry.revenue ?? 20000,
+  };
+}
+
 function migrate(saved) {
   if (!saved) return null;
-  if (saved.monthlyData) return saved;
+
+  // already new top-level format
+  if (saved.monthlyData) {
+    // still need to migrate individual month entries that predate variableCosts
+    const monthlyData = {};
+    Object.entries(saved.monthlyData).forEach(([ym, entry]) => {
+      monthlyData[ym] = migrateMonthEntry(entry);
+    });
+    return { ...saved, monthlyData };
+  }
+
+  // very old flat format
   const ym = ymNow();
   const fc = { ...DEFAULT_FIXED };
   if (saved.fixedCosts) {
-    FIXED_KEYS.forEach((k) => {
-      if (saved.fixedCosts[k] != null) fc[k] = saved.fixedCosts[k];
-    });
+    FIXED_KEYS.forEach((k) => { if (saved.fixedCosts[k] != null) fc[k] = saved.fixedCosts[k]; });
   }
   return {
-    workDays:       saved.workDays      ?? 22,
-    hoursPerDay:    saved.hoursPerDay   ?? 10,
+    workDays:       saved.workDays       ?? 22,
+    hoursPerDay:    saved.hoursPerDay    ?? 10,
     cardFeePercent: saved.cardFeePercent ?? 2,
     selectedMonth:  ym,
     monthlyData: {
-      [ym]: { fixedCosts: fc, rawMaterial: saved.rawMaterial ?? 8000, revenue: saved.revenue ?? 20000 },
+      [ym]: {
+        fixedCosts:    fc,
+        variableCosts: { ...DEFAULT_VARIABLE, mercado: saved.rawMaterial ?? 4000 },
+        revenue:       saved.revenue ?? 20000,
+      },
     },
   };
 }
@@ -108,7 +134,7 @@ export const useCostsStore = create((set) => ({
     });
   },
 
-  updateRawMaterial(value) {
+  updateVariableCost(key, value) {
     set((s) => {
       const ym = s.selectedMonth;
       let next = ensureMonth(s, ym);
@@ -116,7 +142,10 @@ export const useCostsStore = create((set) => ({
         ...next,
         monthlyData: {
           ...next.monthlyData,
-          [ym]: { ...next.monthlyData[ym], rawMaterial: parseFloat(value) || 0 },
+          [ym]: {
+            ...next.monthlyData[ym],
+            variableCosts: { ...next.monthlyData[ym].variableCosts, [key]: parseFloat(value) || 0 },
+          },
         },
       };
       persist(next);
@@ -155,4 +184,8 @@ export const useCostsStore = create((set) => ({
 
 export function totalFixedCosts(fixedCosts) {
   return FIXED_KEYS.reduce((sum, k) => sum + (fixedCosts?.[k] || 0), 0);
+}
+
+export function totalVariableCosts(variableCosts) {
+  return VARIABLE_KEYS.reduce((sum, k) => sum + (variableCosts?.[k] || 0), 0);
 }

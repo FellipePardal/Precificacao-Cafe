@@ -34,8 +34,8 @@ function Section({ title, children, delay = '' }) {
 
 export default function CostForm() {
   const {
-    fixedCosts, rawMaterial, cardFeePercent, revenue, workDays, hoursPerDay, selectedMonth,
-    updateFixedCost, updateRawMaterial, updateCardFee, updateRevenue, updateWorkDays, updateHoursPerDay,
+    fixedCosts, variableCosts, rawMaterial, cardFeePercent, revenue, workDays, hoursPerDay, selectedMonth,
+    updateFixedCost, updateVariableCost, updateCardFee, updateRevenue, updateWorkDays, updateHoursPerDay,
   } = useCosts();
   const { setSelectedMonth } = useCostsStore();
   const { payroll, employees } = useEmployees();
@@ -111,11 +111,22 @@ export default function CostForm() {
         </div>
       </Section>
 
-      {/* Variable costs */}
-      <Section title="Custos Variáveis" delay="delay-2">
+      {/* Variable costs — per supplier */}
+      <Section title="Compras & Fornecedores" delay="delay-2">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Matéria-Prima Mensal" value={rawMaterial}    onChange={updateRawMaterial} />
-          <Field label="Taxa de Cartão"       value={cardFeePercent} onChange={updateCardFee} prefix={null} suffix="%" />
+          <Field label="Supermercado"          value={variableCosts.mercado}     onChange={(v) => updateVariableCost('mercado', v)} />
+          <Field label="Feira"                 value={variableCosts.feira}       onChange={(v) => updateVariableCost('feira', v)} />
+          <Field label="Hortifrúti"            value={variableCosts.hortifruti}  onChange={(v) => updateVariableCost('hortifruti', v)} />
+          <Field label="Fornecedor Salgados"   value={variableCosts.salgados}    onChange={(v) => updateVariableCost('salgados', v)} />
+          <Field label="Fornecedor Doces"      value={variableCosts.doces}       onChange={(v) => updateVariableCost('doces', v)} />
+          <Field label="Outros"                value={variableCosts.outros}      onChange={(v) => updateVariableCost('outros', v)} />
+        </div>
+        <div className="flex justify-between items-center pt-2 border-t border-border mt-2">
+          <span className="text-xs font-semibold text-muted uppercase tracking-widest">Total compras</span>
+          <span className="font-serif text-lg text-dark">{formatBRL(rawMaterial)}</span>
+        </div>
+        <div className="mt-2">
+          <Field label="Taxa de Cartão" value={cardFeePercent} onChange={updateCardFee} prefix={null} suffix="%" />
         </div>
       </Section>
 
