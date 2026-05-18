@@ -1,13 +1,14 @@
 import React from 'react';
 import { useCosts } from '../../hooks/useCosts';
 import { useEmployees } from '../../hooks/useEmployees';
+import { useCostsStore, prevYM, nextYM, ymLabel, ymNow } from '../../store/costsStore';
 import { formatBRL } from '../../utils/formatters';
 
-const inputCls = "flex-1 px-3 py-2.5 text-sm text-dark bg-white focus:outline-none tabular-nums";
-const wrapCls  = "flex items-center border border-border rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-accent/30 bg-white";
-const prefCls  = "px-3 py-2.5 text-sm text-muted bg-surface2 border-r border-border font-medium select-none";
-const sufCls   = "px-3 py-2.5 text-sm text-muted bg-surface2 border-l border-border font-medium select-none";
-const labelCls = "text-[11px] font-semibold text-muted uppercase tracking-widest mb-1.5 block";
+const inputCls = 'flex-1 px-3 py-2.5 text-sm text-dark bg-white focus:outline-none tabular-nums';
+const wrapCls  = 'flex items-center border border-border rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-accent/30 bg-white';
+const prefCls  = 'px-3 py-2.5 text-sm text-muted bg-surface2 border-r border-border font-medium select-none';
+const sufCls   = 'px-3 py-2.5 text-sm text-muted bg-surface2 border-l border-border font-medium select-none';
+const labelCls = 'text-[11px] font-semibold text-muted uppercase tracking-widest mb-1.5 block';
 
 function Field({ label, value, onChange, suffix, prefix = 'R$' }) {
   return (
@@ -33,21 +34,58 @@ function Section({ title, children, delay = '' }) {
 
 export default function CostForm() {
   const {
-    fixedCosts, rawMaterial, cardFeePercent, revenue, workDays, hoursPerDay,
+    fixedCosts, rawMaterial, cardFeePercent, revenue, workDays, hoursPerDay, selectedMonth,
     updateFixedCost, updateRawMaterial, updateCardFee, updateRevenue, updateWorkDays, updateHoursPerDay,
   } = useCosts();
+  const { setSelectedMonth } = useCostsStore();
   const { payroll, employees } = useEmployees();
+
+  const currentYM = ymNow();
+  const atCurrent = selectedMonth === currentYM;
 
   return (
     <div className="space-y-4">
+
+      {/* Month navigator */}
+      <div className="bg-white rounded-xl border border-border px-5 py-4 flex items-center justify-between animate-fade-up">
+        <button
+          onClick={() => setSelectedMonth(prevYM(selectedMonth))}
+          className="p-2 rounded-lg hover:bg-surface transition-colors text-muted hover:text-dark"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+
+        <div className="text-center">
+          <p className="font-serif text-lg text-dark leading-none">{ymLabel(selectedMonth)}</p>
+          {atCurrent
+            ? <p className="text-[10px] text-accent2 font-semibold uppercase tracking-widest mt-1">Mês atual</p>
+            : <p className="text-[10px] text-muted uppercase tracking-widest mt-1">Histórico</p>}
+        </div>
+
+        <button
+          onClick={() => setSelectedMonth(nextYM(selectedMonth))}
+          disabled={atCurrent}
+          className="p-2 rounded-lg hover:bg-surface transition-colors text-muted hover:text-dark disabled:opacity-25 disabled:cursor-not-allowed"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+
+      {/* Fixed costs */}
       <Section title="Custos Fixos Mensais" delay="delay-1">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Aluguel"             value={fixedCosts.aluguel}  onChange={(v) => updateFixedCost('aluguel', v)} />
+
+          {/* Folha — read-only, driven by Equipe */}
           <div>
             <label className={labelCls}>Folha + Encargos</label>
-            <div className={wrapCls} style={{ opacity: 0.75 }}>
+            <div className={wrapCls} style={{ opacity: 0.72 }}>
               <span className={prefCls}>R$</span>
-              <span className={inputCls + ' flex items-center text-dark font-semibold select-none'}>
+              <span className={`${inputCls} flex items-center font-semibold text-dark select-none`}>
                 {formatBRL(payroll)}
               </span>
               <span className={sufCls} style={{ fontSize: 10, whiteSpace: 'nowrap' }}>
@@ -55,6 +93,7 @@ export default function CostForm() {
               </span>
             </div>
           </div>
+
           <Field label="Energia"             value={fixedCosts.energia}  onChange={(v) => updateFixedCost('energia', v)} />
           <Field label="Água & Gás"          value={fixedCosts.aguaGas}  onChange={(v) => updateFixedCost('aguaGas', v)} />
           <Field label="Internet & Telefone" value={fixedCosts.internet} onChange={(v) => updateFixedCost('internet', v)} />
@@ -63,15 +102,17 @@ export default function CostForm() {
         </div>
       </Section>
 
+      {/* Variable costs */}
       <Section title="Custos Variáveis" delay="delay-2">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Matéria-Prima Mensal" value={rawMaterial}     onChange={updateRawMaterial} />
-          <Field label="Taxa de Cartão"       value={cardFeePercent}  onChange={updateCardFee} prefix={null} suffix="%" />
+          <Field label="Matéria-Prima Mensal" value={rawMaterial}    onChange={updateRawMaterial} />
+          <Field label="Taxa de Cartão"       value={cardFeePercent} onChange={updateCardFee} prefix={null} suffix="%" />
         </div>
       </Section>
 
+      {/* Operation — global, not per-month */}
       <Section title="Operação" delay="delay-3">
-        <Field label="Faturamento Atual (R$/mês)" value={revenue} onChange={updateRevenue} />
+        <Field label="Faturamento do Mês (R$)" value={revenue} onChange={updateRevenue} />
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Dias Trabalhados/mês</label>

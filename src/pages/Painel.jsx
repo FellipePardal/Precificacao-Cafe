@@ -24,12 +24,14 @@ function buildAlerts({ cmv, folhaPct, margem, faturamento, breakEvenValue }) {
 }
 
 export default function Painel() {
-  const { fixedCosts, cardFeePercent, revenue, totalFixed, totalMonthlyCost, cmv, breakEvenValue } = useCosts();
+  const { fixedCosts, payroll, cardFeePercent, revenue, totalFixed, totalMonthlyCost, cmv, breakEvenValue } = useCosts();
 
-  const folhaPct = revenue > 0 ? (fixedCosts.folha / revenue) * 100 : 0;
+  const folhaPct = revenue > 0 ? (payroll / revenue) * 100 : 0;
   const lucro    = revenue - totalMonthlyCost - (revenue * cardFeePercent / 100);
   const margem   = revenue > 0 ? (lucro / revenue) * 100 : 0;
   const alerts   = buildAlerts({ cmv, folhaPct, margem, faturamento: revenue, breakEvenValue });
+
+  const breakdownCosts = { ...fixedCosts, folha: payroll };
 
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-6">
@@ -43,7 +45,7 @@ export default function Painel() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <CostBreakdown costs={fixedCosts} />
+        <CostBreakdown costs={breakdownCosts} />
         <HealthIndicators cmv={cmv} folhaPct={folhaPct} margem={margem} faturamento={revenue} breakEven={breakEvenValue} />
       </div>
 
