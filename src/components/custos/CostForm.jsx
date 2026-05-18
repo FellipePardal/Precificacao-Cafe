@@ -107,7 +107,6 @@ export default function CostForm() {
           <Field label="Energia"             value={fixedCosts.energia}  onChange={(v) => updateFixedCost('energia', v)} />
           <Field label="Água & Gás"          value={fixedCosts.aguaGas}  onChange={(v) => updateFixedCost('aguaGas', v)} />
           <Field label="Internet & Telefone" value={fixedCosts.internet} onChange={(v) => updateFixedCost('internet', v)} />
-          <Field label="Taxas Delivery"      value={fixedCosts.delivery} onChange={(v) => updateFixedCost('delivery', v)} />
           <Field label="Outros"              value={fixedCosts.outros}   onChange={(v) => updateFixedCost('outros', v)} />
         </div>
       </Section>

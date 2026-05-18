@@ -23,7 +23,8 @@ export function ymLabel(ym) {
   return `${MONTHS[m - 1]} ${y}`;
 }
 
-const DEFAULT_FIXED = { aluguel: 4500, energia: 600, aguaGas: 350, internet: 150, delivery: 800, outros: 300 };
+const FIXED_KEYS = ['aluguel', 'energia', 'aguaGas', 'internet', 'outros'];
+const DEFAULT_FIXED = { aluguel: 4500, energia: 600, aguaGas: 350, internet: 150, outros: 300 };
 const DEFAULT_MONTH = { fixedCosts: { ...DEFAULT_FIXED }, rawMaterial: 8000, revenue: 20000 };
 
 function deepCopy(obj) { return JSON.parse(JSON.stringify(obj)); }
@@ -34,7 +35,7 @@ function migrate(saved) {
   const ym = ymNow();
   const fc = { ...DEFAULT_FIXED };
   if (saved.fixedCosts) {
-    ['aluguel','energia','aguaGas','internet','delivery','outros'].forEach((k) => {
+    FIXED_KEYS.forEach((k) => {
       if (saved.fixedCosts[k] != null) fc[k] = saved.fixedCosts[k];
     });
   }
@@ -153,5 +154,5 @@ export const useCostsStore = create((set) => ({
 }));
 
 export function totalFixedCosts(fixedCosts) {
-  return Object.values(fixedCosts || {}).reduce((sum, v) => sum + (v || 0), 0);
+  return FIXED_KEYS.reduce((sum, k) => sum + (fixedCosts?.[k] || 0), 0);
 }

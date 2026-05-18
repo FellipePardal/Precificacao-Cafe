@@ -7,7 +7,6 @@ const labels = {
   energia:  'Energia',
   aguaGas:  'Água & Gás',
   internet: 'Internet & Tel.',
-  delivery: 'Taxas Delivery',
   outros:   'Outros',
 };
 
