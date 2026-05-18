@@ -8,6 +8,7 @@ import FichaTecnica from './pages/FichaTecnica';
 import Cardapio from './pages/Cardapio';
 import Simulador from './pages/Simulador';
 import Equipe from './pages/Equipe';
+import CustosVariaveis from './pages/CustosVariaveis';
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/"             element={<Navigate to="/painel" replace />} />
           <Route path="/painel"       element={<Painel />} />
           <Route path="/custos"       element={<Custos />} />
+          <Route path="/compras"      element={<CustosVariaveis />} />
           <Route path="/ingredientes" element={<Ingredientes />} />
           <Route path="/ficha"        element={<FichaTecnica />} />
           <Route path="/cardapio"     element={<Cardapio />} />

@@ -1,4 +1,5 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import { useCosts } from '../../hooks/useCosts';
 import { ymLabel } from '../../store/costsStore';
 import { formatBRL } from '../../utils/formatters';
@@ -15,19 +16,8 @@ function Item({ label, value, highlight, sub }) {
   );
 }
 
-const VARIABLE_LABELS = {
-  mercado:    'Supermercado',
-  feira:      'Feira',
-  hortifruti: 'Hortifrúti',
-  salgados:   'Salgados',
-  doces:      'Doces',
-  outros:     'Outros',
-};
-
 export default function CostSummary() {
-  const { totalFixed, rawMaterial, variableCosts, totalMonthlyCost, costPerMin, selectedMonth, payroll } = useCosts();
-
-  const variableEntries = Object.entries(variableCosts || {}).filter(([, v]) => v > 0);
+  const { totalFixed, rawMaterial, totalMonthlyCost, costPerMin, selectedMonth, payroll } = useCosts();
 
   return (
     <div className="bg-white rounded-xl border border-border p-5 animate-fade-up delay-1 space-y-4">
@@ -37,35 +27,28 @@ export default function CostSummary() {
       </div>
 
       <div className="space-y-2">
-        <Item label="Custos Fixos" value={formatBRL(totalFixed)} sub={`Folha: ${formatBRL(payroll)}`} />
-        <Item label="Total Mensal" value={formatBRL(totalMonthlyCost)} highlight />
-        <Item label="Custo / Hora"    value={formatBRL(costPerMin * 60)} />
-        <Item label="Custo / Minuto"  value={formatBRL(costPerMin)} />
+        <Item label="Custos Fixos"   value={formatBRL(totalFixed)}       sub={`Folha: ${formatBRL(payroll)}`} />
+        <Item label="Total Mensal"   value={formatBRL(totalMonthlyCost)} highlight />
+        <Item label="Custo / Hora"   value={formatBRL(costPerMin * 60)} />
+        <Item label="Custo / Minuto" value={formatBRL(costPerMin)} />
       </div>
 
-      {/* Variable cost breakdown */}
-      <div>
-        <div className="flex justify-between items-center mb-2">
-          <p className="text-[11px] font-semibold text-muted uppercase tracking-widest">Compras & Fornecedores</p>
-          <p className="text-sm font-semibold text-dark">{formatBRL(rawMaterial)}</p>
+      {/* Link to variable costs */}
+      <NavLink
+        to="/compras"
+        className="flex items-center justify-between rounded-lg px-4 py-3 bg-surface2 hover:bg-accent-light transition-colors group"
+      >
+        <div>
+          <p className="text-xs font-medium text-muted group-hover:text-accent transition-colors">Compras & Fornecedores</p>
+          <p className="text-[10px] text-light mt-0.5">Ver detalhes</p>
         </div>
-        <div className="space-y-1.5">
-          {variableEntries.map(([key, value]) => {
-            const pct = rawMaterial > 0 ? (value / rawMaterial) * 100 : 0;
-            return (
-              <div key={key}>
-                <div className="flex justify-between mb-0.5">
-                  <span className="text-xs text-muted">{VARIABLE_LABELS[key] || key}</span>
-                  <span className="text-xs font-medium text-dark tabular-nums">{formatBRL(value)}</span>
-                </div>
-                <div className="h-1 bg-surface2 rounded-full overflow-hidden">
-                  <div className="h-full bg-accent2 rounded-full" style={{ width: `${pct}%` }} />
-                </div>
-              </div>
-            );
-          })}
+        <div className="flex items-center gap-2">
+          <span className="font-serif text-lg text-dark group-hover:text-accent transition-colors">{formatBRL(rawMaterial)}</span>
+          <svg className="w-3.5 h-3.5 text-muted group-hover:text-accent transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+          </svg>
         </div>
-      </div>
+      </NavLink>
     </div>
   );
 }
