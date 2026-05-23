@@ -35,11 +35,11 @@ export default function CostSummary() {
 
       {/* Link to variable costs */}
       <NavLink
-        to="/compras"
+        to="/operacoes/custos-variaveis"
         className="flex items-center justify-between rounded-lg px-4 py-3 bg-surface2 hover:bg-accent-light transition-colors group"
       >
         <div>
-          <p className="text-xs font-medium text-muted group-hover:text-accent transition-colors">Compras & Fornecedores</p>
+          <p className="text-xs font-medium text-muted group-hover:text-accent transition-colors">Custos Variáveis</p>
           <p className="text-[10px] text-light mt-0.5">Ver detalhes</p>
         </div>
         <div className="flex items-center gap-2">

@@ -34,8 +34,8 @@ function Section({ title, children, delay = '' }) {
 
 export default function CostForm() {
   const {
-    fixedCosts, cardFeePercent, revenue, workDays, hoursPerDay, selectedMonth,
-    updateFixedCost, updateCardFee, updateRevenue, updateWorkDays, updateHoursPerDay,
+    fixedCosts, selectedMonth,
+    updateFixedCost,
   } = useCosts();
   const { setSelectedMonth } = useCostsStore();
   const { payroll, employees } = useEmployees();
@@ -109,24 +109,6 @@ export default function CostForm() {
           </div>
         </Section>
 
-        <Section title="Operação" delay="delay-2">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="Faturamento do Mês (R$)" value={revenue} onChange={updateRevenue} />
-            <Field label="Taxa de Cartão" value={cardFeePercent} onChange={updateCardFee} prefix={null} suffix="%" />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={labelCls}>Dias Trabalhados/mês</label>
-              <input type="number" min="1" max="31" value={workDays} onChange={(e) => updateWorkDays(e.target.value)}
-                className="border border-border rounded-lg px-3 py-2.5 text-sm w-full bg-white focus:outline-none focus:ring-2 focus:ring-accent/30 tabular-nums" />
-            </div>
-            <div>
-              <label className={labelCls}>Horas por Dia</label>
-              <input type="number" min="1" max="24" value={hoursPerDay} onChange={(e) => updateHoursPerDay(e.target.value)}
-                className="border border-border rounded-lg px-3 py-2.5 text-sm w-full bg-white focus:outline-none focus:ring-2 focus:ring-accent/30 tabular-nums" />
-            </div>
-          </div>
-        </Section>
 
       </div>
     </div>
