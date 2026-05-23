@@ -6,7 +6,6 @@ import Custos from './pages/Custos';
 import Ingredientes from './pages/Ingredientes';
 import FichaTecnica from './pages/FichaTecnica';
 import Cardapio from './pages/Cardapio';
-import Simulador from './pages/Simulador';
 import Equipe from './pages/Equipe';
 import CustosVariaveis from './pages/CustosVariaveis';
 import Receitas from './pages/Receitas';
@@ -32,7 +31,6 @@ export default function App() {
           <Route path="/ingredientes" element={<Ingredientes />} />
           <Route path="/ficha"        element={<FichaTecnica />} />
           <Route path="/cardapio"     element={<Cardapio />} />
-          <Route path="/simulador"    element={<Simulador />} />
           <Route path="/equipe"       element={<Equipe />} />
         </Routes>
       </main>
