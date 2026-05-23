@@ -66,9 +66,16 @@ function normalizeVariableCosts(vc) {
   return result;
 }
 
+function normalizeFixedCosts(fc) {
+  if (!fc) return { ...DEFAULT_FIXED };
+  const result = { ...DEFAULT_FIXED };
+  FIXED_KEYS.forEach((k) => { if (fc[k] != null) result[k] = fc[k]; });
+  return result;
+}
+
 function migrateMonthEntry(entry) {
   return {
-    fixedCosts:    entry.fixedCosts    || { ...DEFAULT_FIXED },
+    fixedCosts:    normalizeFixedCosts(entry.fixedCosts),
     variableCosts: normalizeVariableCosts(entry.variableCosts),
     revenue:       entry.revenue       ?? 20000,
   };
