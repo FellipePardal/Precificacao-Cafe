@@ -24,30 +24,60 @@ export function ymLabel(ym) {
 }
 
 const FIXED_KEYS    = ['aluguel', 'energia', 'aguaGas', 'internet', 'outros'];
-const VARIABLE_KEYS = ['mercado', 'feira', 'hortifruti', 'salgados', 'doces', 'outros'];
+export const VARIABLE_KEYS = ['mercado', 'feira', 'hortifruti', 'salgados', 'doces', 'outros'];
 
-const DEFAULT_FIXED    = { aluguel: 4500, energia: 600, aguaGas: 350, internet: 150, outros: 300 };
-const DEFAULT_VARIABLE = { mercado: 4000, feira: 1000, hortifruti: 800, salgados: 1000, doces: 800, outros: 400 };
-const DEFAULT_MONTH    = { fixedCosts: { ...DEFAULT_FIXED }, variableCosts: { ...DEFAULT_VARIABLE }, revenue: 20000 };
+const DEFAULT_FIXED = { aluguel: 4500, energia: 600, aguaGas: 350, internet: 150, outros: 300 };
+
+function newId() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function defaultItems(value) {
+  return value > 0 ? [{ id: newId(), label: 'Compra', value }] : [];
+}
+
+const DEFAULT_VARIABLE = {
+  mercado:    [{ id: 'def-m1', label: 'Compra', value: 4000 }],
+  feira:      [{ id: 'def-f1', label: 'Compra', value: 1000 }],
+  hortifruti: [{ id: 'def-h1', label: 'Compra', value: 800 }],
+  salgados:   [{ id: 'def-s1', label: 'Compra', value: 1000 }],
+  doces:      [{ id: 'def-d1', label: 'Compra', value: 800 }],
+  outros:     [{ id: 'def-o1', label: 'Compra', value: 400 }],
+};
+
+const DEFAULT_MONTH = { fixedCosts: { ...DEFAULT_FIXED }, variableCosts: DEFAULT_VARIABLE, revenue: 20000 };
 
 function deepCopy(obj) { return JSON.parse(JSON.stringify(obj)); }
 
+// Normaliza variableCosts: converte números (formato antigo) para arrays
+function normalizeVariableCosts(vc) {
+  if (!vc) return deepCopy(DEFAULT_VARIABLE);
+  const result = {};
+  VARIABLE_KEYS.forEach((k) => {
+    const v = vc[k];
+    if (Array.isArray(v)) {
+      result[k] = v;
+    } else if (typeof v === 'number') {
+      result[k] = defaultItems(v);
+    } else {
+      result[k] = [];
+    }
+  });
+  return result;
+}
+
 function migrateMonthEntry(entry) {
-  if (entry.variableCosts) return entry;
-  // old format had rawMaterial — move it to mercado
   return {
-    fixedCosts:    entry.fixedCosts || { ...DEFAULT_FIXED },
-    variableCosts: { ...DEFAULT_VARIABLE, mercado: entry.rawMaterial ?? 4000 },
-    revenue:       entry.revenue ?? 20000,
+    fixedCosts:    entry.fixedCosts    || { ...DEFAULT_FIXED },
+    variableCosts: normalizeVariableCosts(entry.variableCosts),
+    revenue:       entry.revenue       ?? 20000,
   };
 }
 
 function migrate(saved) {
   if (!saved) return null;
 
-  // already new top-level format
   if (saved.monthlyData) {
-    // still need to migrate individual month entries that predate variableCosts
     const monthlyData = {};
     Object.entries(saved.monthlyData).forEach(([ym, entry]) => {
       monthlyData[ym] = migrateMonthEntry(entry);
@@ -69,7 +99,7 @@ function migrate(saved) {
     monthlyData: {
       [ym]: {
         fixedCosts:    fc,
-        variableCosts: { ...DEFAULT_VARIABLE, mercado: saved.rawMaterial ?? 4000 },
+        variableCosts: normalizeVariableCosts(saved.variableCosts || { mercado: saved.rawMaterial ?? 4000 }),
         revenue:       saved.revenue ?? 20000,
       },
     },
@@ -134,17 +164,68 @@ export const useCostsStore = create((set) => ({
     });
   },
 
-  updateVariableCost(key, value) {
+  // Adiciona um novo item a uma categoria de custo variável
+  addVariableItem(key, label = 'Nova compra') {
     set((s) => {
       const ym = s.selectedMonth;
       let next = ensureMonth(s, ym);
+      const vc    = next.monthlyData[ym].variableCosts;
+      const items = Array.isArray(vc[key]) ? vc[key] : [];
       next = {
         ...next,
         monthlyData: {
           ...next.monthlyData,
           [ym]: {
             ...next.monthlyData[ym],
-            variableCosts: { ...next.monthlyData[ym].variableCosts, [key]: parseFloat(value) || 0 },
+            variableCosts: { ...vc, [key]: [...items, { id: newId(), label, value: 0 }] },
+          },
+        },
+      };
+      persist(next);
+      return next;
+    });
+  },
+
+  // Atualiza label ou value de um item
+  updateVariableItem(key, id, field, value) {
+    set((s) => {
+      const ym = s.selectedMonth;
+      let next = ensureMonth(s, ym);
+      const vc    = next.monthlyData[ym].variableCosts;
+      const items = Array.isArray(vc[key]) ? vc[key] : [];
+      const parsed = field === 'value' ? parseFloat(value) || 0 : value;
+      next = {
+        ...next,
+        monthlyData: {
+          ...next.monthlyData,
+          [ym]: {
+            ...next.monthlyData[ym],
+            variableCosts: {
+              ...vc,
+              [key]: items.map((item) => item.id === id ? { ...item, [field]: parsed } : item),
+            },
+          },
+        },
+      };
+      persist(next);
+      return next;
+    });
+  },
+
+  // Remove um item de uma categoria
+  removeVariableItem(key, id) {
+    set((s) => {
+      const ym = s.selectedMonth;
+      let next = ensureMonth(s, ym);
+      const vc    = next.monthlyData[ym].variableCosts;
+      const items = Array.isArray(vc[key]) ? vc[key] : [];
+      next = {
+        ...next,
+        monthlyData: {
+          ...next.monthlyData,
+          [ym]: {
+            ...next.monthlyData[ym],
+            variableCosts: { ...vc, [key]: items.filter((item) => item.id !== id) },
           },
         },
       };
@@ -186,6 +267,12 @@ export function totalFixedCosts(fixedCosts) {
   return FIXED_KEYS.reduce((sum, k) => sum + (fixedCosts?.[k] || 0), 0);
 }
 
+export function categoryTotal(variableCosts, key) {
+  const v = variableCosts?.[key];
+  if (Array.isArray(v)) return v.reduce((s, item) => s + (item.value || 0), 0);
+  return typeof v === 'number' ? v : 0;
+}
+
 export function totalVariableCosts(variableCosts) {
-  return VARIABLE_KEYS.reduce((sum, k) => sum + (variableCosts?.[k] || 0), 0);
+  return VARIABLE_KEYS.reduce((sum, k) => sum + categoryTotal(variableCosts, k), 0);
 }
